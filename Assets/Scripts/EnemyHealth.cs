@@ -13,6 +13,8 @@ public class EnemyHealth : MonoBehaviour
 
     public void TakeDamage(float amount)
     {
+        EnemyAI ai = GetComponent<EnemyAI>();
+        ai.animator.SetTrigger("isHitted");
         currentHealth -= amount;
         Debug.Log($"{gameObject.name} took {amount} damage, remaining: {currentHealth}");
 
@@ -24,7 +26,20 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
-        // Optional: chơi animation, hiệu ứng, âm thanh
-        Destroy(gameObject); // Xoá enemy khỏi scene
+        UIManager.Instance.AddKill();
+
+        EnemySpawnAfterDie spawner = FindObjectOfType<EnemySpawnAfterDie>();
+        EnemyAI ai = GetComponent<EnemyAI>();
+
+        if (spawner != null && ai != null)
+        {
+            Vector3 pos = ai.spawnPointPosition;
+            Quaternion rot = ai.spawnPointRotation;
+            spawner.StartCoroutine(spawner.RespawnAfterDelay(pos, rot));
+        }
+
+        Destroy(gameObject);
     }
+
+
 }
